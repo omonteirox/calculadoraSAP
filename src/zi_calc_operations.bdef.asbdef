@@ -62,10 +62,11 @@ with draft;
 define behavior for ZI_CALC_Operations alias Operation
 persistent table ZCALC_OPERATIONS
 draft table ZCALC_OPR_D
+with additional save
 etag master LocalLastChangedAt
 lock master total etag LastChangedAt
 authorization master ( global )
-late numbering
+authorization master ( global )
 {
   ///////////////////////////////////////////////////////////////////////////
   // OPERAÇÕES PADRÃO (Standard Operations)
@@ -96,7 +97,8 @@ late numbering
   //    - O framework (UUID, timestamps, usernames via @Semantics)
   //    - Determinations (como o campo Result)
   ///////////////////////////////////////////////////////////////////////////
-  field ( readonly ) CalcUuid, CalcResult,
+  field ( numbering : managed, readonly ) CalcUuid;
+  field ( readonly ) CalcResult,
                      CreatedBy, CreatedAt,
                      LastChangedBy, LastChangedAt, LocalLastChangedAt;
 
@@ -252,7 +254,7 @@ draft table ZCALC_HIS_D
 etag master LocalLastChangedAt
 lock dependent by _Operation
 authorization dependent by _Operation
-late numbering
+authorization dependent by _Operation
 {
   update;
   delete;
@@ -260,7 +262,8 @@ late numbering
   ///////////////////////////////////////////////////////////////////////////
   // TODOS os campos são readonly (histórico é imutável)
   ///////////////////////////////////////////////////////////////////////////
-  field ( readonly ) HistUuid, CalcUuid,
+  field ( numbering : managed, readonly ) HistUuid;
+  field ( readonly ) CalcUuid,
                      Operand1, Operator, Operand2, CalcResult,
                      ExecutedAt, ExecutedBy, LocalLastChangedAt;
 

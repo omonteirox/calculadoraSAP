@@ -458,24 +458,18 @@ CLASS lhc_operation IMPLEMENTATION.
     "=========================================================================
     " 🎓 AUTHORIZATION: get_global_authorizations
     "=========================================================================
-    "
-    " 📌 Este método é obrigatório quando o BDEF declara:
-    "    "authorization master ( global )"
-    "
-    " Em um cenário de produção, aqui você verificaria o
-    " authorization object (AUTHORITY-CHECK OBJECT) para decidir
-    " se o usuário pode criar, atualizar ou deletar.
-    "
-    " Para fins didáticos, deixamos sem implementação, o que
-    " significa que TODOS os usuários têm acesso completo.
-    "
-    " 📌 Em produção, NUNCA deixe vazio! Exemplo:
-    "    AUTHORITY-CHECK OBJECT 'Z_CALC_AUTH'
-    "      ID 'ACTVT' FIELD '02'.
-    "    IF sy-subrc <> 0.
-    "      result-%update = if_abap_behv=>auth-unauthorized.
-    "    ENDIF.
-    "=========================================================================
+    
+    " Concedendo permissão total explicitamente para fins didáticos:
+    IF requested_authorizations-%create EQ if_abap_behv=>mk-requested.
+      result-%create = if_abap_behv=>auth-allowed.
+    ENDIF.
+    IF requested_authorizations-%update EQ if_abap_behv=>mk-requested.
+      result-%update = if_abap_behv=>auth-allowed.
+    ENDIF.
+    IF requested_authorizations-%delete EQ if_abap_behv=>mk-requested.
+      result-%delete = if_abap_behv=>auth-allowed.
+    ENDIF.
+
   ENDMETHOD.
 
 ENDCLASS.
@@ -517,62 +511,12 @@ ENDCLASS.
 CLASS lsc_zi_calc_operations DEFINITION INHERITING FROM cl_abap_behavior_saver.
   PROTECTED SECTION.
 
-    METHODS adjust_numbers REDEFINITION.
     METHODS save_modified  REDEFINITION.
 
 ENDCLASS.
 
 
 CLASS lsc_zi_calc_operations IMPLEMENTATION.
-
-  METHOD adjust_numbers.
-    "=========================================================================
-    " 🎓 LATE NUMBERING: adjust_numbers
-    "=========================================================================
-    "
-    " QUANDO EXECUTA: Logo antes do COMMIT WORK, após todas as
-    "                 validations e determinations terem rodado.
-    "
-    " O QUE FAZ: Atribui a chave FINAL (UUID) a cada instância nova.
-    "
-    " 📌 COMO FUNCIONA:
-    " 1. O framework cria instâncias com %pid (ID provisório)
-    " 2. Neste método, iteramos sobre mapped-Operation
-    "    (tabela com as instâncias que serão salvas)
-    " 3. Para cada uma, configuramos %key-CalcUuid = %pid
-    "    (neste caso simplificado, %pid já é um UUID válido)
-    "
-    " 📌 ALTERNATIVA: EARLY NUMBERING
-    "    Se usássemos "early numbering" no BDEF, a chave seria
-    "    atribuída NO MOMENTO DA CRIAÇÃO (antes de qualquer edição).
-    "    Isso requer implementar o método FOR NUMBERING.
-    "    Late numbering é mais comum em cenários com draft.
-    "
-    " 📌 %pid vs %key:
-    "    - %pid = Provisional ID (temporário, usado durante o ciclo)
-    "    - %key = Chave real da entidade (usada na tabela de banco)
-    "    Neste ponto, precisamos mapear um para o outro.
-    "=========================================================================
-
-    "-------------------------------------------------------------------------
-    " Atribuir UUID para cada nova Operation
-    "-------------------------------------------------------------------------
-    LOOP AT mapped-Operation ASSIGNING FIELD-SYMBOL(<operation>).
-      <operation>-%key-CalcUuid = <operation>-%pid.
-    ENDLOOP.
-
-    "-------------------------------------------------------------------------
-    " Atribuir UUID para cada novo History
-    "
-    " 📌 Registros de History são criados no save_modified.
-    "    Mas se por algum motivo existirem instâncias de History
-    "    em mapped, também precisamos atribuir a chave.
-    "-------------------------------------------------------------------------
-    LOOP AT mapped-History ASSIGNING FIELD-SYMBOL(<history>).
-      <history>-%key-HistUuid = <history>-%pid.
-    ENDLOOP.
-
-  ENDMETHOD.
 
 
   METHOD save_modified.

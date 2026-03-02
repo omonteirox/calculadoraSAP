@@ -123,7 +123,9 @@ annotate entity ZC_CALC_Operations with
   //
   // 📌 importance: #HIGH → campo sempre visível mesmo em telas menores
   ///////////////////////////////////////////////////////////////////////
-  @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'ID da Operação' }]
+  @UI.lineItem: [
+    { position: 10, importance: #HIGH, label: 'ID da Operação' }
+  ]
   @UI.identification: [{ position: 10, label: 'ID da Operação' }]
   @UI.selectionField: [{ position: 10 }]
   CalcUuid;
