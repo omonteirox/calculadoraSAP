@@ -1,0 +1,186 @@
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  METADATA EXTENSION: ZC_CALC_Operations
+// =====================================================================
+//
+//  🎓 CONCEITO DIDÁTICO: Metadata Extension (MDE)
+//  ─────────────────────────────────────────────────
+//  A Metadata Extension é um artefato SEPARADO que contém SOMENTE
+//  anotações de UI (@UI.*). Isso segue a melhor prática da SAP de
+//  separar DADOS (CDS View) de APRESENTAÇÃO (MDE).
+//
+//  📌 VANTAGENS:
+//  - A CDS View fica limpa, focada no modelo de dados
+//  - Diferentes Metadata Extensions podem ser criadas para
+//    diferentes layouts (ex: um layout para desktop, outro para mobile)
+//  - Facilita manutenção: mudar layout não requer tocar na view
+//
+//  📌 PRÉ-REQUISITO:
+//  - A Projection View DEVE ter a anotação:
+//    @Metadata.allowExtensions: true
+//
+//  📌 ANOTAÇÕES UI PRINCIPAIS:
+//  - @UI.headerInfo: informações do cabeçalho da Object Page
+//  - @UI.lineItem: colunas exibidas no List Report (tabela)
+//  - @UI.identification: campos exibidos na Object Page
+//  - @UI.facet: seções/abas na Object Page
+//  - @UI.selectionField: campos de filtro no List Report
+//  - @UI.fieldGroup: agrupamento de campos em seções
+//
+///////////////////////////////////////////////////////////////////////////////
+
+@Metadata.layer: #CUSTOMER
+
+///////////////////////////////////////////////////////////////////////
+// @UI.headerInfo:
+//   - typeName: nome singular exibido no topo da Object Page
+//   - typeNamePlural: nome plural exibido no List Report
+//   - title: campo usado como título de cada linha
+//   - description: campo usado como subtítulo
+///////////////////////////////////////////////////////////////////////
+@UI.headerInfo: {
+  typeName: 'Operação',
+  typeNamePlural: 'Operações',
+  title: {
+    type: #STANDARD,
+    value: 'CalcUuid'
+  },
+  description: {
+    type: #STANDARD,
+    value: 'Result'
+  }
+}
+
+annotate entity ZC_CALC_Operations with
+{
+
+  ///////////////////////////////////////////////////////////////////////
+  // @UI.facet: Define as SEÇÕES da Object Page
+  //
+  // 🎓 CONCEITO: Facets são como "abas" ou "cards" na Object Page.
+  //    Existem dois tipos principais:
+  //
+  //    1. #IDENTIFICATION_REFERENCE → Gera uma seção com os campos
+  //       marcados com @UI.identification
+  //
+  //    2. #LINEITEM_REFERENCE → Gera uma tabela com os campos
+  //       marcados com @UI.lineItem de uma ENTIDADE FILHA
+  //       (via targetElement apontando para a composição)
+  //
+  //    A propriedade "targetElement" é a chave aqui: ela aponta
+  //    para o nome da composição (_History) e faz o Fiori
+  //    renderizar uma tabela de histórico DENTRO da Object Page.
+  ///////////////////////////////////////////////////////////////////////
+  @UI.facet: [
+    //-----------------------------------------------------------------
+    // FACET 1: Dados da Operação (tipo: referência de identificação)
+    // - Mostra os campos marcados com @UI.identification
+    // - É a seção principal com os dados de entrada da calculadora
+    //-----------------------------------------------------------------
+    {
+      id:       'OperationData',
+      purpose:  #STANDARD,
+      type:     #IDENTIFICATION_REFERENCE,
+      label:    'Dados da Operação',
+      position: 10
+    },
+    //-----------------------------------------------------------------
+    // FACET 2: Informações Administrativas
+    // - Mostra campos como "Criado por", "Criado em", etc.
+    // - Usa fieldGroup com qualifier para agrupar campos
+    //-----------------------------------------------------------------
+    {
+      id:       'AdminData',
+      purpose:  #STANDARD,
+      type:     #FIELDGROUP_REFERENCE,
+      label:    'Informações Administrativas',
+      targetQualifier: 'AdminFields',
+      position: 20
+    },
+    //-----------------------------------------------------------------
+    // FACET 3: Histórico de Operações (tipo: referência de line item)
+    // - Renderiza uma tabela com os registros da entidade filha
+    // - targetElement: '_History' → aponta para a composição
+    // - O Fiori Elements gera automaticamente a tabela usando
+    //   as anotações @UI.lineItem da view ZC_CALC_History
+    //-----------------------------------------------------------------
+    {
+      id:            'HistoryList',
+      purpose:       #STANDARD,
+      type:          #LINEITEM_REFERENCE,
+      label:         'Histórico de Cálculos',
+      targetElement: '_History',
+      position:      30
+    }
+  ]
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPO: CalcUuid (ID da Operação)
+  //
+  // @UI.lineItem: → aparece como coluna no List Report
+  // @UI.identification: → aparece como campo na Object Page
+  // @UI.selectionField: → aparece como filtro no List Report
+  //
+  // 📌 importance: #HIGH → campo sempre visível mesmo em telas menores
+  ///////////////////////////////////////////////////////////////////////
+  @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'ID da Operação' }]
+  @UI.identification: [{ position: 10, label: 'ID da Operação' }]
+  @UI.selectionField: [{ position: 10 }]
+  CalcUuid;
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPO: Operand1 (1º Operando)
+  ///////////////////////////////////////////////////////////////////////
+  @UI.lineItem: [{ position: 20, importance: #HIGH, label: '1º Operando' }]
+  @UI.identification: [{ position: 20, label: '1º Operando' }]
+  Operand1;
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPO: Operator (Operador Aritmético)
+  //
+  // 📌 @UI.textArrangement: #TEXT_ONLY → Se tivéssemos um text provider,
+  //    exibiria apenas o texto. Aqui é didático.
+  ///////////////////////////////////////////////////////////////////////
+  @UI.lineItem: [{ position: 30, importance: #HIGH, label: 'Operador' }]
+  @UI.identification: [{ position: 30, label: 'Operador (+, -, *, /, P)' }]
+  Operator;
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPO: Operand2 (2º Operando)
+  ///////////////////////////////////////////////////////////////////////
+  @UI.lineItem: [{ position: 40, importance: #HIGH, label: '2º Operando' }]
+  @UI.identification: [{ position: 40, label: '2º Operando' }]
+  Operand2;
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPO: Result (Resultado do Cálculo)
+  //
+  // 📌 Este campo é READONLY no BDEF, então o Fiori o exibe
+  //    como não-editável automaticamente. O valor é preenchido
+  //    pela Determination on Modify no backend.
+  ///////////////////////////////////////////////////////////////////////
+  @UI.lineItem: [{ position: 50, importance: #HIGH, label: 'Resultado',
+                    criticality: 'ResultCriticality' }]
+  @UI.identification: [{ position: 50, label: 'Resultado' }]
+  Result;
+
+  ///////////////////////////////////////////////////////////////////////
+  // CAMPOS ADMINISTRATIVOS (agrupados via @UI.fieldGroup)
+  //
+  // 📌 fieldGroup com qualifier 'AdminFields':
+  //    Estes campos serão exibidos juntos na seção "Informações
+  //    Administrativas" da Object Page (referenciada pelo facet
+  //    com targetQualifier: 'AdminFields')
+  ///////////////////////////////////////////////////////////////////////
+  @UI.fieldGroup: [{ qualifier: 'AdminFields', position: 10, label: 'Criado por' }]
+  CreatedBy;
+
+  @UI.fieldGroup: [{ qualifier: 'AdminFields', position: 20, label: 'Criado em' }]
+  CreatedAt;
+
+  @UI.fieldGroup: [{ qualifier: 'AdminFields', position: 30, label: 'Alterado por' }]
+  LastChangedBy;
+
+  @UI.fieldGroup: [{ qualifier: 'AdminFields', position: 40, label: 'Alterado em' }]
+  LastChangedAt;
+}

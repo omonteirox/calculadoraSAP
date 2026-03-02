@@ -1,0 +1,271 @@
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  BEHAVIOR DEFINITION: ZI_CALC_Operations (Interface Layer)
+// =====================================================================
+//
+//  🎓 CONCEITO DIDÁTICO: Behavior Definition (BDEF)
+//  ──────────────────────────────────────────────────
+//  O BDEF é o "CONTRATO" do Business Object (BO). Ele define:
+//  - QUAIS OPERAÇÕES são permitidas (create, update, delete)
+//  - QUAIS CAMPOS são readonly, mandatory, etc.
+//  - QUAIS REGRAS o BO segue (validations, determinations, actions)
+//  - COMO o lock e a autorização funcionam
+//
+//  📌 KEYWORDS IMPORTANTES:
+//
+//  "managed" → O framework RAP gerencia TODO o CRUD automaticamente.
+//              Você não precisa escrever INSERT/UPDATE/DELETE.
+//              O framework faz isso para você. Você só escreve a
+//              lógica de NEGÓCIO (validations, determinations, etc).
+//
+//  "strict ( 2 )" → Nível máximo de rigor sintático do RAP.
+//              Força boas práticas e bloqueia construções obsoletas.
+//              Sempre use strict(2) em projetos novos ABAP Cloud.
+//
+//  "with draft" → Habilita o mecanismo de RASCUNHO (Draft).
+//              Draft permite que o usuário crie/edite dados SEM
+//              salvar imediatamente no banco. Os dados ficam em uma
+//              tabela de draft separada até que o usuário "Ative".
+//              Isso é essencial para Fiori Elements editáveis.
+//
+//  "late numbering" → A chave primária (UUID) é atribuída APENAS no
+//              momento de salvar, não na criação. Até lá, o framework
+//              usa um %pid (ID provisório) internamente.
+//
+//  "implementation in class ZBP_I_CALC_OPERATIONS unique" →
+//              Aponta para a classe ABAP que contém a implementação
+//              dos métodos (handler class). "unique" significa que
+//              APENAS esta classe implementa este BDEF.
+//
+//  "authorization master ( global )" →
+//              Define que esta entidade é a MESTRE de autorização.
+//              "global" significa que a autorização é verificada
+//              uma vez para todo o BO (não por instância).
+//              Em cenários reais, aqui entra o authorization object.
+//
+//  "lock master" → Esta é a entidade que controla o bloqueio.
+//              Entidades filhas usarão "lock dependent by _Operation".
+//
+//  "etag master LocalLastChangedAt" →
+//              O ETag é usado para controle de concorrência otimista.
+//              "etag master" define qual campo é o ETag principal.
+//
+//  "total etag LastChangedAt" →
+//              ETag total usado para detectar mudanças draft vs ativo.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+managed implementation in class ZBP_I_CALC_OPERATIONS unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZI_CALC_Operations alias Operation
+persistent table ZCALC_OPERATIONS
+draft table ZCALC_OPR_D
+etag master LocalLastChangedAt
+lock master total etag LastChangedAt
+authorization master ( global )
+late numbering
+{
+  ///////////////////////////////////////////////////////////////////////////
+  // OPERAÇÕES PADRÃO (Standard Operations)
+  //
+  // 🎓 CONCEITO: No RAP "managed", basta DECLARAR as operações aqui.
+  //    O framework gera toda a lógica de persistência automaticamente.
+  //    - create → INSERT na tabela
+  //    - update → UPDATE na tabela
+  //    - delete → DELETE na tabela
+  //
+  //    Você NÃO escreve SQL. O framework faz tudo.
+  ///////////////////////////////////////////////////////////////////////////
+  create;
+  update;
+  delete;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // CONTROLE DE CAMPOS (Field Control)
+  //
+  // 🎓 CONCEITO: "field ( readonly )" torna campos NÃO-EDITÁVEIS no UI.
+  //    O Fiori Elements respeita isso automaticamente e exibe o campo
+  //    como texto estático (não como input).
+  //
+  //    "field ( mandatory )" torna campos OBRIGATÓRIOS. O Fiori exibe
+  //    um asterisco (*) e impede o save se estiverem vazios.
+  //
+  //    Campos readonly são tipicamente preenchidos por:
+  //    - O framework (UUID, timestamps, usernames via @Semantics)
+  //    - Determinations (como o campo Result)
+  ///////////////////////////////////////////////////////////////////////////
+  field ( readonly ) CalcUuid, Result,
+                     CreatedBy, CreatedAt,
+                     LastChangedBy, LastChangedAt, LocalLastChangedAt;
+
+  field ( mandatory ) Operand1, Operator, Operand2;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // DETERMINATION: calculateResult
+  //
+  // 🎓 CONCEITO: Determination on Modify
+  //    Uma determination é um CÁLCULO AUTOMÁTICO que o framework
+  //    executa quando determinados campos são modificados.
+  //
+  //    "on modify" → executa DURANTE a edição (antes do save)
+  //    { field Operand1, Operator, Operand2; } → gatilhos
+  //
+  //    Sempre que o usuário alterar Operand1, Operator ou Operand2,
+  //    o framework chama o método calculateResult no ABP.
+  //
+  //    Combinado com "side effects", isso faz o Fiori atualizar
+  //    o campo Result em TEMPO REAL na tela.
+  ///////////////////////////////////////////////////////////////////////////
+  determination calculateResult on modify { field Operand1, Operator, Operand2; }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // DETERMINATION: setAdminFields
+  //
+  // 🎓 CONCEITO: Determination on Modify { create; }
+  //    Executa APENAS na criação de uma nova instância.
+  //    Usado aqui para preencher campos administrativos como
+  //    CreatedBy e CreatedAt.
+  //
+  //    📌 NOTA: Em cenários com @Semantics.user.createdBy, o
+  //    framework managed PODE preencher automaticamente. Mas
+  //    implementamos explicitamente para fins didáticos.
+  ///////////////////////////////////////////////////////////////////////////
+  determination setAdminFields on modify { create; }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // VALIDATION: validateOperands
+  //
+  // 🎓 CONCEITO: Validation on Save
+  //    Uma validation é uma VERIFICAÇÃO que acontece ANTES do save.
+  //    Se a validação falhar, o save é impedido e uma mensagem
+  //    de erro é exibida ao usuário.
+  //
+  //    "on save" → executa quando o usuário clica em "Save/Activate"
+  //    { create; field ... } → gatilhos: roda na criação e quando
+  //                            os campos listados são modificados
+  //
+  //    📌 DIFERENÇA Determination vs Validation:
+  //    - Determination: CALCULA valores (ex: Result)
+  //    - Validation: VERIFICA valores (ex: operador válido?)
+  //
+  //    Se a validação encontra erro, ela popula:
+  //    - failed-Operation → marca a instância como falhada
+  //    - reported-Operation → adiciona mensagem de erro
+  ///////////////////////////////////////////////////////////////////////////
+  validation validateOperands on save { create; field Operand1, Operator, Operand2; }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // SIDE EFFECTS
+  //
+  // 🎓 CONCEITO: Side Effects
+  //    Side effects dizem ao Fiori Elements: "quando o campo X mudar,
+  //    recarregue o campo Y do backend".
+  //
+  //    Sem side effects, a determination roda no backend mas o Fiori
+  //    NÃO atualiza a tela automaticamente. Com side effects, o Fiori
+  //    faz uma chamada PATCH+GET ao backend sempre que o campo trigger
+  //    muda, e atualiza os campos afetados na tela.
+  //
+  //    Isso é o que faz o resultado aparecer "em tempo real" enquanto
+  //    o usuário digita os operandos.
+  ///////////////////////////////////////////////////////////////////////////
+  side effects {
+    field Operand1 affects field Result;
+    field Operand2 affects field Result;
+    field Operator  affects field Result;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // COMPOSIÇÃO → Associação com Histórico
+  //
+  // 🎓 CONCEITO: Associação em BDEF
+  //    "association _History { create; with draft; }" permite:
+  //    - create → criar instâncias filhas (registros de histórico)
+  //    - with draft → suporte a draft para a associação
+  //
+  //    Isso é necessário para que o framework RAP mantenha a
+  //    integridade da composição durante todo o ciclo draft.
+  ///////////////////////////////////////////////////////////////////////////
+  association _History { create; with draft; }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // AÇÕES DE DRAFT (Draft Actions)
+  //
+  // 🎓 CONCEITO: Draft Lifecycle
+  //    O ciclo de vida de um draft no Fiori Elements:
+  //
+  //    1. Edit    → Usuário clica "Edit" → cria cópia draft do registro
+  //    2. (edita campos) → dados salvos na draft table automaticamente
+  //    3. Prepare → Fiori chama antes de Activate para rodar validations
+  //    4. Activate → Dados do draft são movidos para tabela persistente
+  //    5. Discard → Usuário cancela → draft é deletado
+  //    6. Resume  → Usuário retorna a um draft abandonado
+  //
+  //    "draft action Activate optimized" →
+  //    "optimized" significa que apenas os campos modificados são
+  //    copiados do draft para a tabela ativa (melhor performance).
+  //
+  //    "draft determine action Prepare" →
+  //    Executa as validations listadas ANTES da ativação.
+  //    Se alguma validation falhar, a ativação é impedida.
+  ///////////////////////////////////////////////////////////////////////////
+  draft action Resume;
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft determine action Prepare
+  {
+    validation validateOperands;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  BEHAVIOR: ZI_CALC_History (Entidade Filha - Histórico)
+// =====================================================================
+//
+//  🎓 CONCEITO: Behavior de Entidade Dependente
+//  ──────────────────────────────────────────────
+//  A entidade filha NÃO tem create próprio (apenas na associação).
+//  Ela herda lock e authorization do pai.
+//
+//  📌 "lock dependent by _Operation":
+//     O lock desta entidade é controlado pelo pai.
+//     Quando o pai está travado para edição, os filhos também estão.
+//
+//  📌 "authorization dependent by _Operation":
+//     A autorização desta entidade é verificada pelo pai.
+//     Se o usuário não pode editar o pai, não pode editar os filhos.
+//
+//  📌 TODOS OS CAMPOS SÃO READONLY:
+//     O histórico é imutável. Os registros são criados
+//     automaticamente pelo backend (determination/saver) e o
+//     usuário nunca os edita diretamente.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+define behavior for ZI_CALC_History alias History
+persistent table ZCALC_HISTORY
+draft table ZCALC_HIS_D
+etag master LocalLastChangedAt
+lock dependent by _Operation
+authorization dependent by _Operation
+late numbering
+{
+  update;
+  delete;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // TODOS os campos são readonly (histórico é imutável)
+  ///////////////////////////////////////////////////////////////////////////
+  field ( readonly ) HistUuid, CalcUuid,
+                     Operand1, Operator, Operand2, Result,
+                     ExecutedAt, ExecutedBy, LocalLastChangedAt;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Associação de volta ao pai (obrigatória em entidades dependentes)
+  ///////////////////////////////////////////////////////////////////////////
+  association _Operation { with draft; }
+}

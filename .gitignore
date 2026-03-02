@@ -1,0 +1,16 @@
+CLAUDE.md
+copilot-instructions.md
+.claude/commands/sap-cds-report.md
+.claude/commands/sap-master.md
+.claude/commands/sap-rap-app.md
+.claude/commands/sap-techlead-review.md
+.claude/commands/sap-unit-test.md
+.agents/sap_master_index.json
+.agents/scripts/build_sap_index.js
+.agents/skills/abap-cloud-expert/SKILL.md
+.agents/workflows/rap-clean-core-pipeline.md
+.agents/workflows/sap-cds-report.md
+.agents/workflows/sap-master.md
+.agents/workflows/sap-rap-app.md
+.agents/workflows/sap-techlead-review.md
+.agents/workflows/sap-unit-test.md

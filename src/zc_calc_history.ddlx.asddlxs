@@ -1,0 +1,71 @@
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  METADATA EXTENSION: ZC_CALC_History
+// =====================================================================
+//
+//  🎓 CONCEITO DIDÁTICO: MDE para Entidade Filha
+//  ───────────────────────────────────────────────
+//  Esta Metadata Extension define como os campos do Histórico
+//  serão exibidos na TABELA dentro da Object Page do pai.
+//
+//  📌 COMO FUNCIONA:
+//  - No MDE do pai (ZC_CALC_Operations), criamos um facet do tipo
+//    #LINEITEM_REFERENCE com targetElement: '_History'
+//  - O Fiori Elements então busca as anotações @UI.lineItem
+//    DESTA MDE para montar as colunas da tabela de histórico
+//
+//  📌 IMPORTANTE:
+//  - A entidade filha History é READ-ONLY para o usuário final
+//  - Os registros são criados automaticamente pelo backend
+//    quando uma operação é salva/ativada
+//  - Por isso, não temos @UI.identification aqui (não há
+//    formulário de edição para o histórico)
+//
+///////////////////////////////////////////////////////////////////////////////
+
+@Metadata.layer: #CUSTOMER
+
+@UI.headerInfo: {
+  typeName: 'Registro de Histórico',
+  typeNamePlural: 'Histórico de Cálculos',
+  title: {
+    type: #STANDARD,
+    value: 'Result'
+  }
+}
+
+annotate entity ZC_CALC_History with
+{
+  ///////////////////////////////////////////////////////////////////////
+  // COLUNAS DA TABELA DE HISTÓRICO
+  //
+  // 📌 Estes @UI.lineItem definem as colunas que aparecem
+  //    na tabela embutida na Object Page do pai.
+  //    Cada coluna mostra o "snapshot" do cálculo no momento
+  //    em que foi executado.
+  ///////////////////////////////////////////////////////////////////////
+
+  @UI.hidden: true
+  HistUuid;
+
+  @UI.hidden: true
+  CalcUuid;
+
+  @UI.lineItem: [{ position: 10, importance: #HIGH, label: '1º Operando' }]
+  Operand1;
+
+  @UI.lineItem: [{ position: 20, importance: #HIGH, label: 'Operador' }]
+  Operator;
+
+  @UI.lineItem: [{ position: 30, importance: #HIGH, label: '2º Operando' }]
+  Operand2;
+
+  @UI.lineItem: [{ position: 40, importance: #HIGH, label: 'Resultado' }]
+  Result;
+
+  @UI.lineItem: [{ position: 50, importance: #MEDIUM, label: 'Executado por' }]
+  ExecutedBy;
+
+  @UI.lineItem: [{ position: 60, importance: #MEDIUM, label: 'Executado em' }]
+  ExecutedAt;
+}

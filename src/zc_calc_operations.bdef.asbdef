@@ -1,0 +1,68 @@
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  BEHAVIOR DEFINITION: ZC_CALC_Operations (Projection Layer)
+// =====================================================================
+//
+//  🎓 CONCEITO DIDÁTICO: BDEF de Projeção
+//  ────────────────────────────────────────
+//  O BDEF de projeção NÃO define comportamento novo.
+//  Ele PROJETA (re-expõe) o comportamento definido na Interface.
+//
+//  📌 POR QUE EXISTE?
+//  - A Service Definition expõe a PROJEÇÃO (ZC_*), não a Interface (ZI_*)
+//  - Logo, o OData precisa de um BDEF na camada de projeção
+//  - Usamos "use" ao invés de definir operações novas
+//
+//  📌 "projection;" → indica que este BDEF é uma projeção
+//  📌 "use draft;" → projeta o suporte a draft da camada inferior
+//  📌 "use create/update/delete;" → projeta as operações CRUD
+//  📌 "use action/determination/validation;" → projeta regras
+//
+//  📌 REGRA: Tudo que foi definido na Interface e que deve ser
+//    acessível pelo consumidor DEVE ser projetado aqui com "use".
+//    Se não for projetado, não aparece no OData/Fiori.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+projection;
+strict ( 2 );
+use draft;
+
+define behavior for ZC_CALC_Operations alias Operation
+{
+  ///////////////////////////////////////////////////////////////////////////
+  // Projetando as operações CRUD do pai
+  ///////////////////////////////////////////////////////////////////////////
+  use create;
+  use update;
+  use delete;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Projetando a composição (permite criar filhos pelo OData)
+  ///////////////////////////////////////////////////////////////////////////
+  use association _History { create; with draft; }
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Projetando as ações de draft
+  //
+  // 📌 CADA ação de draft definida na Interface DEVE ser
+  //    projetada aqui. Se você esquecer alguma, o Fiori Elements
+  //    não conseguirá executar aquela ação.
+  ///////////////////////////////////////////////////////////////////////////
+  use draft action Resume;
+  use draft action Edit;
+  use draft action Activate;
+  use draft action Discard;
+  use draft action Prepare;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// BDEF de projeção para a entidade filha History
+///////////////////////////////////////////////////////////////////////////////
+define behavior for ZC_CALC_History alias History
+{
+  use update;
+  use delete;
+
+  use association _Operation { with draft; }
+}

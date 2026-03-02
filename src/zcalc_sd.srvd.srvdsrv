@@ -1,0 +1,54 @@
+///////////////////////////////////////////////////////////////////////////////
+// =====================================================================
+//  SERVICE DEFINITION: ZCALC_SD
+// =====================================================================
+//
+//  🎓 CONCEITO DIDÁTICO: Service Definition (SRVD)
+//  ─────────────────────────────────────────────────
+//  A Service Definition é o artefato que EXPÕE as CDS Projection Views
+//  como um SERVIÇO OData. Ela define QUAIS entidades estarão disponíveis
+//  para consumo externo (Fiori, APIs, etc).
+//
+//  📌 REGRAS:
+//  - Sempre exponha as PROJECTION Views (ZC_*), nunca as Interface (ZI_*)
+//  - Use aliases curtos e significativos para os entity sets OData
+//  - A SRVD em si NÃO define o protocolo (V2 ou V4) — isso é feito
+//    no Service Binding (SRVB), que deve ser criado manualmente no ADT
+//
+//  📌 DIFERENÇA SRVD vs SRVB:
+//  - SRVD (Service Definition): define O QUE é exposto
+//  - SRVB (Service Binding): define COMO é exposto (V2/V4, UI/API)
+//
+//  📌 POR QUE O SRVB NÃO ESTÁ AQUI?
+//  O Service Binding (SRVB) não pode ser importado via abapGit.
+//  Ele deve ser criado MANUALMENTE no ADT:
+//  1. File → New → Service Binding
+//  2. Nome: ZCALC_SB_UI_V4
+//  3. Tipo: OData V4 - UI
+//  4. Service Definition: ZCALC_SD
+//  5. Publish e Preview
+//
+///////////////////////////////////////////////////////////////////////////////
+
+@EndUserText.label: 'Calculadora RAP - Service Definition'
+
+define service ZCALC_SD {
+
+  ///////////////////////////////////////////////////////////////////////
+  // EXPOSIÇÃO DAS ENTIDADES
+  //
+  // 📌 "expose ZC_CALC_Operations as Operations"
+  //    - Cria um entity set OData chamado "Operations"
+  //    - Acessível via URL: .../srvd/sap/zcalc_sd/0001/Operations
+  //
+  // 📌 "expose ZC_CALC_History as History"
+  //    - Cria o entity set OData para o histórico
+  //    - Acessível como sub-entidade:
+  //      .../Operations(uuid)/History
+  //    ou diretamente:
+  //      .../History
+  ///////////////////////////////////////////////////////////////////////
+  expose ZC_CALC_Operations as Operations;
+  expose ZC_CALC_History    as History;
+
+}

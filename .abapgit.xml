@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+    <DATA>
+      <MASTER_LANGUAGE>E</MASTER_LANGUAGE>
+      <STARTING_FOLDER>/src/</STARTING_FOLDER>
+      <FOLDER_LOGIC>PREFIX</FOLDER_LOGIC>
+      <IGNORE>
+        <item>.gitignore</item>
+        <item>.gitlab-ci.yml</item>
+        <item>README.md</item>
+        <item>package.json</item>
+        <item>package-lock.json</item>
+        <item>ui5.yaml</item>
+        <item>ui5-mock.yaml</item>
+        <item>ui5-local.yaml</item>
+        <item>ui5-deploy.yaml</item>
+        <item>webapp/</item>
+        <item>mta.yaml</item>
+        <item>project.json</item>
+        <item>xs-app.json</item>
+        <item>xs-security.json</item>
+        <item>.pipeline/</item>
+        <item>.vscode/</item>
+        <item>.prettierrc</item>
+        <item>.eslintrc</item>
+        <item>.eslintignore</item>
+        <item>karma-ci.conf.js</item>
+        <item>.agents/</item>
+        <item>.claude/</item>
+        <item>CLAUDE.md</item>
+        <item>copilot-instructions.md</item>
+      </IGNORE>
+    </DATA>
+  </asx:values>
+</asx:abap>
