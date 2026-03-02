@@ -64,6 +64,13 @@ define root view entity ZI_CALC_Operations
       operand_2        as Operand2,
       calc_result      as CalcResult,
 
+      case calc_result
+        when 'Divisão por 0' then 1
+        when 'Erro de overflow' then 1
+        when '' then 0
+        else 3
+      end              as ResultCriticality,
+
       ///////////////////////////////////////////////////////////////////////
       // CAMPOS ADMINISTRATIVOS (Admin Fields)
       //

@@ -32,6 +32,7 @@
 @EndUserText.label: 'Calculadora RAP - Operações (Projection)'
 
 @Metadata.allowExtensions: true
+@ObjectModel.semanticKey: ['CalcUuid']
 
 define root view entity ZC_CALC_Operations
   provider contract transactional_query
@@ -49,13 +50,13 @@ define root view entity ZC_CALC_Operations
       //    ficam na METADATA EXTENSION separada, seguindo best practice.
       ///////////////////////////////////////////////////////////////////////
 
-      @ObjectModel.semanticKey: ['CalcUuid']
   key CalcUuid,
 
       Operand1,
       Operator,
       Operand2,
       CalcResult,
+      ResultCriticality,
 
       ///////////////////////////////////////////////////////////////////////
       // CAMPOS ADMINISTRATIVOS

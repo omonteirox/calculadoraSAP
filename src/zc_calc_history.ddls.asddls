@@ -22,12 +22,12 @@
 @EndUserText.label: 'Calculadora RAP - Histórico (Projection)'
 
 @Metadata.allowExtensions: true
+@ObjectModel.semanticKey: ['HistUuid']
 
 define view entity ZC_CALC_History
   as projection on ZI_CALC_History
 
 {
-      @ObjectModel.semanticKey: ['HistUuid']
   key HistUuid,
 
       CalcUuid,
@@ -51,6 +51,5 @@ define view entity ZC_CALC_History
       // - "redirected to parent" reconecta a associação para a
       //   Projection View do pai (ZC_CALC_Operations)
       ///////////////////////////////////////////////////////////////////////
-      /* Association: redirect to parent projection */
-      _Operation : redirected to parent ZC_CALC_Operations
+      //_Operation : redirected to parent ZC_CALC_Operations
 }
