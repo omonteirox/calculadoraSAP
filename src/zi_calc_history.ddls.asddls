@@ -66,7 +66,7 @@ define view entity ZI_CALC_History
       operand_1        as Operand1,
       operator         as Operator,
       operand_2        as Operand2,
-      result           as Result,
+      calc_result      as CalcResult,
 
       ///////////////////////////////////////////////////////////////////////
       // CAMPOS DE AUDITORIA DO HISTÓRICO

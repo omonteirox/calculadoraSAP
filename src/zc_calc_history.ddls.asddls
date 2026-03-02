@@ -41,7 +41,7 @@ define view entity ZC_CALC_History
       Operand1,
       Operator,
       Operand2,
-      Result,
+      CalcResult,
 
       ExecutedBy,
       ExecutedAt,

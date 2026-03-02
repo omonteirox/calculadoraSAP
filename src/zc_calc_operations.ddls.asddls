@@ -55,7 +55,7 @@ define root view entity ZC_CALC_Operations
       Operand1,
       Operator,
       Operand2,
-      Result,
+      CalcResult,
 
       ///////////////////////////////////////////////////////////////////////
       // CAMPOS ADMINISTRATIVOS

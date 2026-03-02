@@ -30,7 +30,7 @@
   typeNamePlural: 'Histórico de Cálculos',
   title: {
     type: #STANDARD,
-    value: 'Result'
+    value: 'CalcResult'
   }
 }
 
@@ -61,7 +61,7 @@ annotate entity ZC_CALC_History with
   Operand2;
 
   @UI.lineItem: [{ position: 40, importance: #HIGH, label: 'Resultado' }]
-  Result;
+  CalcResult;
 
   @UI.lineItem: [{ position: 50, importance: #MEDIUM, label: 'Executado por' }]
   ExecutedBy;

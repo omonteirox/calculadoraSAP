@@ -171,7 +171,7 @@ CLASS lhc_operation IMPLEMENTATION.
           " O resultado é convertido para string automaticamente
           " pelo ABAP (o campo Result é CHAR50)
           "-----------------------------------------------------------------
-          <operation>-Result = SWITCH #( <operation>-Operator
+          <operation>-CalcResult = SWITCH #( <operation>-Operator
             WHEN '+' THEN |{ <operation>-Operand1 + <operation>-Operand2 }|
             WHEN '-' THEN |{ <operation>-Operand1 - <operation>-Operand2 }|
             WHEN '*' THEN |{ <operation>-Operand1 * <operation>-Operand2 }|
@@ -186,7 +186,7 @@ CLASS lhc_operation IMPLEMENTATION.
           "-----------------------------------------------------------------
           IF <operation>-Operand1 = 0 AND <operation>-Operand2 = 0
              AND <operation>-Operator = '/'.
-            <operation>-Result = `Divisão por 0`.
+            <operation>-CalcResult = `Divisão por 0`.
           ENDIF.
 
         CATCH cx_sy_zerodivide.
@@ -195,7 +195,7 @@ CLASS lhc_operation IMPLEMENTATION.
           " Disparada quando tentamos dividir um número diferente de
           " zero por zero. ABAP levanta esta exceção de runtime.
           "---------------------------------------------------------------
-          <operation>-Result = `Divisão por 0`.
+          <operation>-CalcResult = `Divisão por 0`.
 
         CATCH cx_sy_arithmetic_overflow.
           "---------------------------------------------------------------
@@ -203,7 +203,7 @@ CLASS lhc_operation IMPLEMENTATION.
           " Disparada quando o resultado excede o limite do tipo
           " numérico (ex: potências muito grandes).
           "---------------------------------------------------------------
-          <operation>-Result = `Erro de overflow`.
+          <operation>-CalcResult = `Erro de overflow`.
 
       ENDTRY.
 
@@ -223,7 +223,7 @@ CLASS lhc_operation IMPLEMENTATION.
     "-------------------------------------------------------------------------
     MODIFY ENTITIES OF zi_calc_operations IN LOCAL MODE
       ENTITY Operation
-        UPDATE FIELDS ( Result )
+        UPDATE FIELDS ( CalcResult )
         WITH CORRESPONDING #( lt_operations )
         FAILED DATA(lt_failed_mod)
         REPORTED DATA(lt_reported_mod).
@@ -341,7 +341,7 @@ CLASS lhc_operation IMPLEMENTATION.
     "-------------------------------------------------------------------------
     READ ENTITIES OF zi_calc_operations IN LOCAL MODE
       ENTITY Operation
-        FIELDS ( Operand1 Operator Operand2 Result )
+        FIELDS ( Operand1 Operator Operand2 CalcResult )
         WITH CORRESPONDING #( keys )
         RESULT DATA(lt_operations)
         FAILED DATA(lt_failed_read)
@@ -414,7 +414,7 @@ CLASS lhc_operation IMPLEMENTATION.
       "-----------------------------------------------------------------
       " VALIDAÇÃO 2: Divisão por zero
       "-----------------------------------------------------------------
-      ELSEIF <operation>-Result = 'Divisão por 0'.
+      ELSEIF <operation>-CalcResult = 'Divisão por 0'.
 
         APPEND VALUE #( %tky = <operation>-%tky ) TO failed-Operation.
 
@@ -431,7 +431,7 @@ CLASS lhc_operation IMPLEMENTATION.
       "-----------------------------------------------------------------
       " VALIDAÇÃO 3: Overflow aritmético
       "-----------------------------------------------------------------
-      ELSEIF <operation>-Result = 'Erro de overflow'.
+      ELSEIF <operation>-CalcResult = 'Erro de overflow'.
 
         APPEND VALUE #( %tky = <operation>-%tky ) TO failed-Operation.
 
@@ -640,7 +640,7 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
           operand_1   = <create>-Operand1
           operator    = <create>-Operator
           operand_2   = <create>-Operand2
-          result      = <create>-Result
+          calc_result = <create>-CalcResult
           executed_by = sy-uname
           executed_at = utclong_current( )
           local_last_changed_at = utclong_current( )
@@ -672,7 +672,7 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
       " (neste ponto do save, os dados já foram gravados pelo framework)
       "---------------------------------------------------------------------
       IF lt_calc_uuids IS NOT INITIAL.
-        SELECT calc_uuid, operand_1, operator, operand_2, result
+        SELECT calc_uuid, operand_1, operator, operand_2, calc_result
           FROM zcalc_operations
           FOR ALL ENTRIES IN @lt_calc_uuids
           WHERE calc_uuid = @lt_calc_uuids-table_line
@@ -692,7 +692,7 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
             operand_1   = <updated>-operand_1
             operator    = <updated>-operator
             operand_2   = <updated>-operand_2
-            result      = <updated>-result
+            calc_result = <updated>-calc_result
             executed_by = sy-uname
             executed_at = utclong_current( )
             local_last_changed_at = utclong_current( )

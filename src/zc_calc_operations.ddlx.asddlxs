@@ -47,7 +47,7 @@
   },
   description: {
     type: #STANDARD,
-    value: 'Result'
+    value: 'CalcResult'
   }
 }
 
@@ -162,7 +162,7 @@ annotate entity ZC_CALC_Operations with
   @UI.lineItem: [{ position: 50, importance: #HIGH, label: 'Resultado',
                     criticality: 'ResultCriticality' }]
   @UI.identification: [{ position: 50, label: 'Resultado' }]
-  Result;
+  CalcResult;
 
   ///////////////////////////////////////////////////////////////////////
   // CAMPOS ADMINISTRATIVOS (agrupados via @UI.fieldGroup)

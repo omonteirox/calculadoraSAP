@@ -96,7 +96,7 @@ late numbering
   //    - O framework (UUID, timestamps, usernames via @Semantics)
   //    - Determinations (como o campo Result)
   ///////////////////////////////////////////////////////////////////////////
-  field ( readonly ) CalcUuid, Result,
+  field ( readonly ) CalcUuid, CalcResult,
                      CreatedBy, CreatedAt,
                      LastChangedBy, LastChangedAt, LocalLastChangedAt;
 
@@ -172,9 +172,9 @@ late numbering
   //    o usuário digita os operandos.
   ///////////////////////////////////////////////////////////////////////////
   side effects {
-    field Operand1 affects field Result;
-    field Operand2 affects field Result;
-    field Operator  affects field Result;
+    field Operand1 affects field CalcResult;
+    field Operand2 affects field CalcResult;
+    field Operator  affects field CalcResult;
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -261,7 +261,7 @@ late numbering
   // TODOS os campos são readonly (histórico é imutável)
   ///////////////////////////////////////////////////////////////////////////
   field ( readonly ) HistUuid, CalcUuid,
-                     Operand1, Operator, Operand2, Result,
+                     Operand1, Operator, Operand2, CalcResult,
                      ExecutedAt, ExecutedBy, LocalLastChangedAt;
 
   ///////////////////////////////////////////////////////////////////////////
