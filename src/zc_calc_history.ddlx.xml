@@ -3,9 +3,11 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <DDLX>
-    <DDLXNAME>ZC_CALC_HISTORY</DDLXNAME>
-    <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>RAP Calculator - History (Metadata Extension)</DDTEXT>
+    <METADATA>
+     <NAME>ZC_CALC_HISTORY</NAME>
+     <DESCRIPTION>RAP Calculator - History (Metadata Extension)</DESCRIPTION>
+     <TYPE>METADATAEXTENSION</TYPE>
+    </METADATA>
    </DDLX>
   </asx:values>
  </asx:abap>

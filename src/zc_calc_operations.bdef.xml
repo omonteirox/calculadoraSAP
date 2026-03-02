@@ -3,9 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <BDEF>
-    <BDEF_NAME>ZC_CALC_OPERATIONS</BDEF_NAME>
-    <DDLANGUAGE>E</DDLANGUAGE>
-    <DDTEXT>RAP Calculator - Behavior (Projection)</DDTEXT>
+    <DESCRIPTION>RAP Calculator - Behavior (Projection)</DESCRIPTION>
    </BDEF>
   </asx:values>
  </asx:abap>
