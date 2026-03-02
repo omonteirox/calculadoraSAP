@@ -139,7 +139,8 @@ CLASS lhc_operation IMPLEMENTATION.
         FIELDS ( Operand1 Operator Operand2 )
         WITH CORRESPONDING #( keys )
         RESULT DATA(lt_operations)
-        FAILED DATA(lt_failed).
+        FAILED DATA(lt_failed_read)
+        REPORTED DATA(lt_reported_read).
 
     "-------------------------------------------------------------------------
     " PASSO 2: Calcular o resultado para cada instância
@@ -223,7 +224,9 @@ CLASS lhc_operation IMPLEMENTATION.
     MODIFY ENTITIES OF zi_calc_operations IN LOCAL MODE
       ENTITY Operation
         UPDATE FIELDS ( Result )
-        WITH CORRESPONDING #( lt_operations ).
+        WITH CORRESPONDING #( lt_operations )
+        FAILED DATA(lt_failed_mod)
+        REPORTED DATA(lt_reported_mod).
 
   ENDMETHOD.
 
@@ -257,7 +260,9 @@ CLASS lhc_operation IMPLEMENTATION.
       ENTITY Operation
         FIELDS ( CreatedBy CreatedAt )
         WITH CORRESPONDING #( keys )
-        RESULT DATA(lt_operations).
+        RESULT DATA(lt_operations)
+        FAILED DATA(lt_failed_read)
+        REPORTED DATA(lt_reported_read).
 
     "-------------------------------------------------------------------------
     " Preparar a lista de atualizações
@@ -295,7 +300,9 @@ CLASS lhc_operation IMPLEMENTATION.
     "-------------------------------------------------------------------------
     MODIFY ENTITIES OF zi_calc_operations IN LOCAL MODE
       ENTITY Operation
-        UPDATE FROM lt_update.
+        UPDATE FROM lt_update
+        FAILED DATA(lt_failed_mod)
+        REPORTED DATA(lt_reported_mod).
 
   ENDMETHOD.
 
@@ -337,7 +344,8 @@ CLASS lhc_operation IMPLEMENTATION.
         FIELDS ( Operand1 Operator Operand2 Result )
         WITH CORRESPONDING #( keys )
         RESULT DATA(lt_operations)
-        FAILED DATA(lt_failed).
+        FAILED DATA(lt_failed_read)
+        REPORTED DATA(lt_reported_read).
 
     "-------------------------------------------------------------------------
     " Validar cada instância
