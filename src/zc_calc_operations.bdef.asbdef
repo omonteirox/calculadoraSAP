@@ -49,11 +49,11 @@ define behavior for ZC_CALC_Operations alias Operation
   //    projetada aqui. Se você esquecer alguma, o Fiori Elements
   //    não conseguirá executar aquela ação.
   ///////////////////////////////////////////////////////////////////////////
-  use draft action Resume;
-  use draft action Edit;
-  use draft action Activate;
-  use draft action Discard;
-  use draft action Prepare;
+  use action Resume;
+  use action Edit;
+  use action Activate;
+  use action Discard;
+  use action Prepare;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

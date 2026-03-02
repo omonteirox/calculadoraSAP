@@ -284,10 +284,12 @@ CLASS lhc_operation IMPLEMENTATION.
     "-------------------------------------------------------------------------
     DATA lt_update TYPE TABLE FOR UPDATE zi_calc_operations.
 
+    GET TIME STAMP FIELD DATA(lv_ts).
+
     lt_update = VALUE #( FOR ls_op IN lt_operations
       ( %tky          = ls_op-%tky
         CreatedBy     = sy-uname
-        CreatedAt     = utclong_current( )
+        CreatedAt     = lv_ts
         %control = VALUE #(
           CreatedBy = if_abap_behv=>mk-on
           CreatedAt = if_abap_behv=>mk-on
@@ -619,6 +621,7 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
     "    Iteramos para criar um registro de histórico para cada.
     "-------------------------------------------------------------------------
     IF create-Operation IS NOT INITIAL.
+      GET TIME STAMP FIELD DATA(lv_hist_ts).
       LOOP AT create-Operation ASSIGNING FIELD-SYMBOL(<create>).
 
         "-------------------------------------------------------------------
@@ -642,8 +645,8 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
           operand_2   = <create>-Operand2
           calc_result = <create>-CalcResult
           executed_by = sy-uname
-          executed_at = utclong_current( )
-          local_last_changed_at = utclong_current( )
+          executed_at = lv_hist_ts
+          local_last_changed_at = lv_hist_ts
         ) TO lt_history.
 
       ENDLOOP.
@@ -678,6 +681,7 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
           WHERE calc_uuid = @lt_calc_uuids-table_line
           INTO TABLE @DATA(lt_updated_ops).
 
+        GET TIME STAMP FIELD lv_hist_ts.
         LOOP AT lt_updated_ops ASSIGNING FIELD-SYMBOL(<updated>).
 
           TRY.
@@ -694,8 +698,8 @@ CLASS lsc_zi_calc_operations IMPLEMENTATION.
             operand_2   = <updated>-operand_2
             calc_result = <updated>-calc_result
             executed_by = sy-uname
-            executed_at = utclong_current( )
-            local_last_changed_at = utclong_current( )
+            executed_at = lv_hist_ts
+            local_last_changed_at = lv_hist_ts
           ) TO lt_history.
 
         ENDLOOP.

@@ -24,7 +24,6 @@
 @Metadata.allowExtensions: true
 
 define view entity ZC_CALC_History
-  provider contract transactional_query
   as projection on ZI_CALC_History
 
 {
